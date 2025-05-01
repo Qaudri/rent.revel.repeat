@@ -1,0 +1,66 @@
+.linen-catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.linen-item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.linen-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.linen-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.linen-item h3 {
+  margin: 10px 0;
+  font-size: 18px;
+}
+
+.linen-item p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.linen-item .button {
+  display: inline-block;
+  margin-right: 8px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.linen-item .button:first-of-type {
+  background-color: #0073aa;
+  color: white;
+}
+
+.linen-item .button:first-of-type:hover {
+  background-color: #005177;
+}
+
+.linen-item .button:last-of-type {
+  background-color: #46b450;
+  color: white;
+}
+
+.linen-item .button:last-of-type:hover {
+  background-color: #369f3a;
+}
