@@ -53,68 +53,6 @@ function linen_shortcode_output($atts) {
 }
 add_shortcode('linens', 'linen_shortcode_output');
 
-// Display the image, name, description, size, color and inquiry button on the product page
-function linen_single_product_display($content) {
-    if ('linen' === get_post_type()) {
-        $output = '<div class="single-linen-container">';
-        
-        // Left side - Image
-        $output .= '<div class="single-linen-image">';
-        if (has_post_thumbnail()) {
-            $output .= get_the_post_thumbnail(null, 'full');
-        }
-        $output .= '</div>';
-
-        // Right side - Details
-        $output .= '<div class="single-linen-details">';
-        $output .= '<h1 class="single-linen-title">' . get_the_title() . '</h1>';
-        $output .= '<div class="single-linen-description">' . $content . '</div>';
-
-        // ACF Fields
-        $color = get_field('color');
-        $size = get_field('size');
-
-        if ($color || $size) {
-            $output .= '<div class="single-linen-fields">';
-            if ($color) {
-                $output .= '<div class="field-group">';
-                $output .= '<label for="color">Color:</label>';
-                $output .= '<select name="color" id="color">';
-                foreach ($color as $color_option) {
-                    $output .= '<option value="' . esc_attr($color_option) . '">' . esc_html($color_option) . '</option>';
-                }
-                $output .= '</select>';
-                $output .= '</div>';
-            }
-
-            if ($size) {
-                $output .= '<div class="field-group">';
-                $output .= '<label for="size">Size:</label>';
-                $output .= '<select name="size" id="size">';
-                foreach ($size as $size_option) {
-                    $output .= '<option value="' . esc_attr($size_option) . '">' . esc_html($size_option) . '</option>';
-                }
-                $output .= '</select>';
-                $output .= '</div>';
-            }
-            $output .= '</div>';
-        }
-
-        // Inquiry form
-        $output .= '<form action="' . esc_url(get_site_url() . '/inquiry/') . '" method="GET" class="single-linen-form">';
-        $output .= '<input type="hidden" name="linen_id" value="' . get_the_ID() . '">';
-        $output .= '<button type="submit" class="button">Make Inquiry</button>';
-        $output .= '</form>';
-        
-        $output .= '</div>'; // End single-linen-details
-        $output .= '</div>'; // End single-linen-container
-        
-        return $output;
-    }
-    return $content;
-}
-add_filter('the_content', 'linen_single_product_display');
-
 // Handle inquiry page (send color, size, and linen id)
 function linen_inquiry_page() {
     if (isset($_GET['linen_id'])) {
