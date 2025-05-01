@@ -157,6 +157,34 @@ class Linen_Catalog {
             $output .= '</div>';
             
             $output .= '</div>';
+
+            // Add this to the plugin, ideally within the shortcode or template rendering
+
+            // Display featured image and custom fields on the single product page
+          function linen_single_product_display() {
+            if ('linen' === get_post_type()) {
+                // Display featured image
+                if (has_post_thumbnail()) {
+                    echo '<div class="linen-image">';
+                    the_post_thumbnail('full');
+                    echo '</div>';
+                }
+
+                // Display custom fields
+                $color = get_field('color');
+                $size = get_field('size');
+                
+                if ($color) {
+                    echo '<p><strong>Color:</strong> ' . esc_html($color) . '</p>';
+                }
+
+                if ($size) {
+                    echo '<p><strong>Size:</strong> ' . esc_html($size) . '</p>';
+                }
+            }
+          }
+          add_action('the_content', 'linen_single_product_display');
+
         }
         
         wp_reset_postdata();
