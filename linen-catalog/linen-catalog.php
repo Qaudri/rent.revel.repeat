@@ -2,8 +2,8 @@
 /*
 Plugin Name: Linen Catalog
 Description: Custom post type and shortcode to display linens with ACF integration.
-Version: 1.1
-Author: Your Name
+Version: 1.2
+Author: Muhammad AbdulQuadir Akanfe
 */
 
 // Exit if accessed directly
@@ -23,6 +23,9 @@ class Linen_Catalog {
         
         // Enqueue styles
         add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
+        
+        // Disable the WordPress editor for the Linen post type
+        add_action('init', array($this, 'disable_editor_for_linen'));
         
         // Add admin notice if ACF is not active
         add_action('admin_notices', array($this, 'check_acf_dependency'));
@@ -47,9 +50,16 @@ class Linen_Catalog {
             'show_in_rest' => true,
             'has_archive' => true,
             'menu_icon' => 'dashicons-archive',
-            'supports' => array('title', 'editor', 'thumbnail'),
+            'supports' => array('title', 'thumbnail'),  // Remove 'editor' support here
             'rewrite' => array('slug' => 'linens'),
         ));
+    }
+
+    /**
+     * Disable the editor for the Linen post type
+     */
+    public function disable_editor_for_linen() {
+        remove_post_type_support('linen', 'editor');
     }
     
     /**
@@ -71,7 +81,7 @@ class Linen_Catalog {
             <?php
         }
     }
-    
+
     /**
      * Enqueue CSS for the linen catalog
      */
@@ -158,3 +168,5 @@ class Linen_Catalog {
 
 // Initialize the plugin
 $linen_catalog = new Linen_Catalog();
+
+?>
