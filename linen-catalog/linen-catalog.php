@@ -37,7 +37,12 @@ function linen_shortcode_output($atts) {
         $permalink = get_permalink();
 
         $output .= '<div class="linen-item">';
-        $output .= '<h3>' . esc_html(get_the_title()) . '</h3>';
+        if (has_post_thumbnail()) {
+            $output .= '<div class="linen-item-image">';
+            $output .= get_the_post_thumbnail(null, 'medium');
+            $output .= '</div>';
+        }
+        $output .= '<h3 class="linen-item-title">' . esc_html(get_the_title()) . '</h3>';
         $output .= '<a class="button" href="' . esc_url($permalink) . '">More details</a>';
         $output .= '</div>';
     }
