@@ -1,200 +1,136 @@
 <?php
 /*
 Plugin Name: Linen Catalog
-Description: Custom post type and shortcode to display linens with ACF integration.
+Description: Custom post type and shortcode to display linens with ACF integration and inquiry page.
 Version: 1.2
 Author: Muhammad AbdulQuadir Akanfe
 */
 
-// Exit if accessed directly
-if (!defined('ABSPATH')) exit;
+// Register 'linen' post type
+function linen_register_post_type() {
+    register_post_type('linen', array(
+        'labels' => array(
+            'name' => 'Linens',
+            'singular_name' => 'Linen',
+        ),
+        'public' => true,
+        'show_in_rest' => true,
+        'has_archive' => true,
+        'menu_icon' => 'dashicons-archive',
+        'supports' => array('title', 'editor', 'thumbnail'),
+        'rewrite' => array('slug' => 'linens'),
+    ));
+}
+add_action('init', 'linen_register_post_type');
 
-class Linen_Catalog {
-    
-    /**
-     * Constructor - initialize the plugin
-     */
-    public function __construct() {
-        // Register post type
-        add_action('init', array($this, 'register_post_type'));
-        
-        // Register shortcode
-        add_shortcode('linens', array($this, 'shortcode_output'));
-        
-        // Enqueue styles
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
-        
-        // Disable the WordPress editor for the Linen post type
-        add_action('init', array($this, 'disable_editor_for_linen'));
-        
-        // Add admin notice if ACF is not active
-        add_action('admin_notices', array($this, 'check_acf_dependency'));
-    }
-    
-    /**
-     * Register 'linen' post type
-     */
-    public function register_post_type() {
-        register_post_type('linen', array(
-            'labels' => array(
-                'name' => 'Linens',
-                'singular_name' => 'Linen',
-                'add_new' => 'Add New Linen',
-                'add_new_item' => 'Add New Linen',
-                'edit_item' => 'Edit Linen',
-                'view_item' => 'View Linen',
-                'search_items' => 'Search Linens',
-                'not_found' => 'No linens found',
-            ),
-            'public' => true,
-            'show_in_rest' => true,
-            'has_archive' => true,
-            'menu_icon' => 'dashicons-archive',
-            'supports' => array('title', 'thumbnail'),  // Remove 'editor' support here
-            'rewrite' => array('slug' => 'linens'),
-        ));
-    }
+// Shortcode to display linens in the catalog (only name and More Details button)
+function linen_shortcode_output($atts) {
+    $args = array(
+        'post_type' => 'linen',
+        'posts_per_page' => -1,
+    );
+    $query = new WP_Query($args);
+    $output = '<div class="linen-catalog">';
 
-    /**
-     * Disable the editor for the Linen post type
-     */
-    public function disable_editor_for_linen() {
-        remove_post_type_support('linen', 'editor');
-    }
-    
-    /**
-     * Check if ACF is active
-     */
-    public function is_acf_active() {
-        return class_exists('ACF');
-    }
-    
-    /**
-     * Admin notice if ACF is not active
-     */
-    public function check_acf_dependency() {
-        if (!$this->is_acf_active() && current_user_can('activate_plugins')) {
-            ?>
-            <div class="notice notice-error">
-                <p>Linen Catalog plugin requires <a href="https://wordpress.org/plugins/advanced-custom-fields/">Advanced Custom Fields</a> to be installed and activated.</p>
-            </div>
-            <?php
-        }
-    }
+    while ($query->have_posts()) {
+        $query->the_post();
+        $permalink = get_permalink();
 
-    /**
-     * Enqueue CSS for the linen catalog
-     */
-    public function enqueue_styles() {
-        wp_enqueue_style(
-            'linen-catalog-styles',
-            plugin_dir_url(__FILE__) . 'css/linen-catalog.css',
-            array(),
-            '1.0.0'
-        );
-    }
-    
-    /**
-     * Shortcode to display linens
-     */
-    public function shortcode_output($atts) {
-        $atts = shortcode_atts(array(
-            'limit' => -1,
-            'orderby' => 'title', 
-            'order' => 'ASC',
-        ), $atts);
-        
-        $args = array(
-            'post_type' => 'linen',
-            'posts_per_page' => intval($atts['limit']),
-            'orderby' => $atts['orderby'],
-            'order' => $atts['order'],
-        );
-        
-        $query = new WP_Query($args);
-        
-        if (!$query->have_posts()) {
-            return '<p>No linens found.</p>';
-        }
-        
-        $output = '<div class="linen-catalog">';
-        
-        while ($query->have_posts()) {
-            $query->the_post();
-            
-            // Check if ACF is active before trying to get fields
-            $color = $this->is_acf_active() ? get_field('color') : '';
-            $size = $this->is_acf_active() ? get_field('size') : '';
-            
-            $image = get_the_post_thumbnail_url(get_the_ID(), 'medium');
-            $permalink = get_permalink();
-            
-            // Build the inquiry URL using site URL for portability
-            $inquiry_url = add_query_arg(
-                array('linen' => get_the_ID()),
-                site_url('/inquiry/')
-            );
-            
-            $output .= '<div class="linen-item">';
-            
-            if ($image) {
-                $output .= '<img src="' . esc_url($image) . '" alt="' . esc_attr(get_the_title()) . '">';
-            }
-            
-            $output .= '<h3>' . esc_html(get_the_title()) . '</h3>';
-            
-            if ($color) {
-                $output .= '<p><strong>Color:</strong> ' . esc_html($color) . '</p>';
-            }
-            
-            if ($size) {
-                $output .= '<p><strong>Size:</strong> ' . esc_html($size) . '</p>';
-            }
-            
-            $output .= '<div class="linen-buttons">';
-            $output .= '<a class="button" href="' . esc_url($permalink) . '">More details</a> ';
-            $output .= '<a class="button" href="' . esc_url($inquiry_url) . '">Make inquiry</a>';
-            $output .= '</div>';
-            
-            $output .= '</div>';
-
-            // Add this to the plugin, ideally within the shortcode or template rendering
-
-            // Display featured image and custom fields on the single product page
-          function linen_single_product_display() {
-            if ('linen' === get_post_type()) {
-                // Display featured image
-                if (has_post_thumbnail()) {
-                    echo '<div class="linen-image">';
-                    the_post_thumbnail('full');
-                    echo '</div>';
-                }
-
-                // Display custom fields
-                $color = get_field('color');
-                $size = get_field('size');
-                
-                if ($color) {
-                    echo '<p><strong>Color:</strong> ' . esc_html($color) . '</p>';
-                }
-
-                if ($size) {
-                    echo '<p><strong>Size:</strong> ' . esc_html($size) . '</p>';
-                }
-            }
-          }
-          add_action('the_content', 'linen_single_product_display');
-
-        }
-        
-        wp_reset_postdata();
+        $output .= '<div class="linen-item">';
+        $output .= '<h3>' . esc_html(get_the_title()) . '</h3>';
+        $output .= '<a class="button" href="' . esc_url($permalink) . '">More details</a>';
         $output .= '</div>';
+    }
+    wp_reset_postdata();
+
+    $output .= '</div>';
+    return $output;
+}
+add_shortcode('linens', 'linen_shortcode_output');
+
+// Display the image, name, description, size, color and inquiry button on the product page
+function linen_single_product_display() {
+    if ('linen' === get_post_type()) {
+        // Get featured image
+        if (has_post_thumbnail()) {
+            echo '<div class="linen-image">';
+            the_post_thumbnail('full');
+            echo '</div>';
+        }
+
+        // Get product name and description
+        echo '<h1>' . get_the_title() . '</h1>';
+        the_content();
+
+        // Get custom fields (Color and Size)
+        $color = get_field('color');
+        $size = get_field('size');
+
+        echo '<form action="' . esc_url(get_site_url() . '/inquiry/') . '" method="GET">';
         
-        return $output;
+        // Display color selection if available
+        if ($color) {
+            echo '<label for="color">Color:</label>';
+            echo '<select name="color" id="color">';
+            foreach ($color as $color_option) {
+                echo '<option value="' . esc_attr($color_option) . '">' . esc_html($color_option) . '</option>';
+            }
+            echo '</select>';
+        }
+
+        // Display size selection if available
+        if ($size) {
+            echo '<label for="size">Size:</label>';
+            echo '<select name="size" id="size">';
+            foreach ($size as $size_option) {
+                echo '<option value="' . esc_attr($size_option) . '">' . esc_html($size_option) . '</option>';
+            }
+            echo '</select>';
+        }
+
+        echo '<input type="hidden" name="linen_id" value="' . get_the_ID() . '">'; // Add linen ID for inquiry
+        
+        // Inquiry button
+        echo '<button type="submit" class="button">Make Inquiry</button>';
+        
+        echo '</form>';
     }
 }
+add_action('the_content', 'linen_single_product_display');
 
-// Initialize the plugin
-$linen_catalog = new Linen_Catalog();
+// Handle inquiry page (send color, size, and linen id)
+function linen_inquiry_page() {
+    if (isset($_GET['linen_id'])) {
+        $linen_id = intval($_GET['linen_id']);
+        $linen = get_post($linen_id);
+        $color = isset($_GET['color']) ? sanitize_text_field($_GET['color']) : '';
+        $size = isset($_GET['size']) ? sanitize_text_field($_GET['size']) : '';
+
+        echo '<h1>Inquiry for ' . esc_html($linen->post_title) . '</h1>';
+        echo '<p><strong>Color:</strong> ' . esc_html($color) . '</p>';
+        echo '<p><strong>Size:</strong> ' . esc_html($size) . '</p>';
+
+        // You can also add more details here or a form to submit the inquiry
+    }
+}
+add_shortcode('linen_inquiry', 'linen_inquiry_page');
+
+// Admin notice if ACF is not active
+function linen_check_acf_dependency() {
+    if (!class_exists('ACF') && current_user_can('activate_plugins')) {
+        ?>
+        <div class="notice notice-error">
+            <p>Linen Catalog plugin requires <a href="https://wordpress.org/plugins/advanced-custom-fields/">Advanced Custom Fields</a> to be installed and activated.</p>
+        </div>
+        <?php
+    }
+}
+add_action('admin_notices', 'linen_check_acf_dependency');
+
+// Enqueue necessary styles
+function linen_enqueue_styles() {
+    wp_enqueue_style('linen-catalog-styles', plugin_dir_url(__FILE__) . 'css/linen-catalog.css');
+}
+add_action('wp_enqueue_scripts', 'linen_enqueue_styles');
 
 ?>
