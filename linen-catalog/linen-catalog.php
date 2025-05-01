@@ -49,54 +49,59 @@ function linen_shortcode_output($atts) {
 add_shortcode('linens', 'linen_shortcode_output');
 
 // Display the image, name, description, size, color and inquiry button on the product page
-function linen_single_product_display() {
+function linen_single_product_display($content) {
     if ('linen' === get_post_type()) {
+        $output = '';
+        
         // Get featured image
         if (has_post_thumbnail()) {
-            echo '<div class="linen-image">';
-            the_post_thumbnail('full');
-            echo '</div>';
+            $output .= '<div class="linen-image">';
+            $output .= get_the_post_thumbnail(null, 'full');
+            $output .= '</div>';
         }
 
         // Get product name and description
-        echo '<h1>' . get_the_title() . '</h1>';
-        the_content();
+        $output .= '<h1>' . get_the_title() . '</h1>';
+        $output .= $content;
 
         // Get custom fields (Color and Size)
         $color = get_field('color');
         $size = get_field('size');
 
-        echo '<form action="' . esc_url(get_site_url() . '/inquiry/') . '" method="GET">';
+        $output .= '<form action="' . esc_url(get_site_url() . '/inquiry/') . '" method="GET">';
         
         // Display color selection if available
         if ($color) {
-            echo '<label for="color">Color:</label>';
-            echo '<select name="color" id="color">';
+            $output .= '<label for="color">Color:</label>';
+            $output .= '<select name="color" id="color">';
             foreach ($color as $color_option) {
-                echo '<option value="' . esc_attr($color_option) . '">' . esc_html($color_option) . '</option>';
+                $output .= '<option value="' . esc_attr($color_option) . '">' . esc_html($color_option) . '</option>';
             }
-            echo '</select>';
+            $output .= '</select>';
         }
 
         // Display size selection if available
         if ($size) {
-            echo '<label for="size">Size:</label>';
-            echo '<select name="size" id="size">';
+            $output .= '<label for="size">Size:</label>';
+            $output .= '<select name="size" id="size">';
             foreach ($size as $size_option) {
-                echo '<option value="' . esc_attr($size_option) . '">' . esc_html($size_option) . '</option>';
+                $output .= '<option value="' . esc_attr($size_option) . '">' . esc_html($size_option) . '</option>';
             }
-            echo '</select>';
+            $output .= '</select>';
         }
 
-        echo '<input type="hidden" name="linen_id" value="' . get_the_ID() . '">'; // Add linen ID for inquiry
+        $output .= '<input type="hidden" name="linen_id" value="' . get_the_ID() . '">'; // Add linen ID for inquiry
         
         // Inquiry button
-        echo '<button type="submit" class="button">Make Inquiry</button>';
+        $output .= '<button type="submit" class="button">Make Inquiry</button>';
         
-        echo '</form>';
+        $output .= '</form>';
+        
+        return $output;
     }
+    return $content;
 }
-add_action('the_content', 'linen_single_product_display');
+add_filter('the_content', 'linen_single_product_display');
 
 // Handle inquiry page (send color, size, and linen id)
 function linen_inquiry_page() {
