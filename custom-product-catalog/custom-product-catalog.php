@@ -103,7 +103,7 @@ add_action('save_post_rental_product', 'cpc_save_product_details');
 function cpc_product_catalog_shortcode($atts) {
     $args = array(
         'post_type' => 'rental_product',
-        'posts_per_page' => 10,  // Adjust number of products per page
+        'posts_per_page' => 16,
         'paged' => get_query_var('paged') ? get_query_var('paged') : 1,
     );
     $query = new WP_Query($args);
@@ -126,8 +126,7 @@ function cpc_product_catalog_shortcode($atts) {
             echo '</div>';
         }
         wp_reset_postdata();
-        
-        // Pagination
+
         echo '<div class="pagination">';
         echo paginate_links(array(
             'total' => $query->max_num_pages,
@@ -142,12 +141,12 @@ function cpc_product_catalog_shortcode($atts) {
 }
 add_shortcode('custom_product_catalog', 'cpc_product_catalog_shortcode');
 
-// Display product details with size, color, and inquiry button on single product pages
+// Show product details on the single product page
 function cpc_product_details_on_single_product($content) {
     if (is_singular('rental_product')) {
         $size = get_post_meta(get_the_ID(), '_custom_size', true);
         $color = get_post_meta(get_the_ID(), '_custom_color', true);
-        $inquiry_url = '/request-quote';  // Update with your actual URL
+        $inquiry_url = '/request-quote';  // Update if needed
 
         $content .= '<div class="product-details">';
         $content .= '<p><strong>Size:</strong> ' . esc_html($size) . '</p>';
