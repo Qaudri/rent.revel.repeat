@@ -2,7 +2,7 @@
 /*
 Plugin Name: Linen Catalog
 Description: Custom post type and shortcode to display linens with ACF integration and inquiry page.
-Version: 1.3
+Version: 1.4
 Author: Muhammad AbdulQuadir Akanfe
 */
 
@@ -23,7 +23,7 @@ function linen_register_post_type() {
 }
 add_action('init', 'linen_register_post_type');
 
-// Shortcode to display linens in the catalog (only name and More Details button)
+// Shortcode to display linens in the catalog
 function linen_shortcode_output($atts) {
     $args = array(
         'post_type' => 'linen',
@@ -53,7 +53,7 @@ function linen_shortcode_output($atts) {
 }
 add_shortcode('linens', 'linen_shortcode_output');
 
-// Handle inquiry page (send color, size, and linen id)
+// Handle inquiry page
 function linen_inquiry_page() {
     $output = '';
     
@@ -107,76 +107,91 @@ function linen_inquiry_page() {
 }
 add_shortcode('linen_inquiry', 'linen_inquiry_page');
 
-// Add description field for linen post type to replace editor
-function linen_register_acf_fields() {
-    if (function_exists('acf_add_local_field_group')) {
-        acf_add_local_field_group(array(
-            'key' => 'group_linen_details',
-            'title' => 'Linen Details',
-            'fields' => array(
-                array(
-                    'key' => 'field_linen_description',
-                    'label' => 'Description',
-                    'name' => 'description',
-                    'type' => 'textarea',
-                    'instructions' => 'Enter the description for this linen item',
-                    'required' => 0,
-                ),
-                array(
-                    'key' => 'field_linen_color',
-                    'label' => 'Colors Available',
-                    'name' => 'color',
-                    'type' => 'repeater',
-                    'instructions' => 'Add the available colors',
-                    'required' => 0,
-                    'layout' => 'table',
-                    'sub_fields' => array(
-                        array(
-                            'key' => 'field_linen_color_value',
-                            'label' => 'Color',
-                            'name' => 'color_value',
-                            'type' => 'text',
-                        ),
-                    ),
-                ),
-                array(
-                    'key' => 'field_linen_size',
-                    'label' => 'Sizes Available',
-                    'name' => 'size',
-                    'type' => 'repeater',
-                    'instructions' => 'Add the available sizes',
-                    'required' => 0,
-                    'layout' => 'table',
-                    'sub_fields' => array(
-                        array(
-                            'key' => 'field_linen_size_value',
-                            'label' => 'Size',
-                            'name' => 'size_value',
-                            'type' => 'text',
-                        ),
-                    ),
-                ),
-            ),
-            'location' => array(
-                array(
-                    array(
-                        'param' => 'post_type',
-                        'operator' => '==',
-                        'value' => 'linen',
-                    ),
-                ),
-            ),
-        ));
+// Register meta boxes for linen post type (simpler approach than ACF)
+function linen_register_meta_boxes() {
+    add_meta_box(
+        'linen_details',
+        'Linen Details',
+        'linen_details_callback',
+        'linen',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'linen_register_meta_boxes');
+
+// Meta box callback function
+function linen_details_callback($post) {
+    // Add nonce for security
+    wp_nonce_field('linen_save_meta', 'linen_meta_nonce');
+    
+    // Get saved values
+    $description = get_post_meta($post->ID, '_linen_description', true);
+    $colors = get_post_meta($post->ID, '_linen_colors', true);
+    $sizes = get_post_meta($post->ID, '_linen_sizes', true);
+    
+    // Parse arrays
+    $colors_array = !empty($colors) ? explode(',', $colors) : array('');
+    $sizes_array = !empty($sizes) ? explode(',', $sizes) : array('');
+    
+    // Output description field
+    echo '<p><label for="linen_description"><strong>Description:</strong></label></p>';
+    echo '<textarea id="linen_description" name="linen_description" style="width: 100%; height: 150px;">' . esc_textarea($description) . '</textarea>';
+    
+    // Output colors field
+    echo '<p><label><strong>Colors:</strong></label> (comma-separated list)</p>';
+    echo '<input type="text" name="linen_colors" value="' . esc_attr($colors) . '" style="width: 100%;">';
+    
+    // Output sizes field
+    echo '<p><label><strong>Sizes:</strong></label> (comma-separated list)</p>';
+    echo '<input type="text" name="linen_sizes" value="' . esc_attr($sizes) . '" style="width: 100%;">';
+}
+
+// Save meta box data
+function linen_save_meta($post_id) {
+    // Check if nonce is set
+    if (!isset($_POST['linen_meta_nonce'])) {
+        return;
+    }
+    
+    // Verify nonce
+    if (!wp_verify_nonce($_POST['linen_meta_nonce'], 'linen_save_meta')) {
+        return;
+    }
+    
+    // Don't save on autosave
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    
+    // Check permissions
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+    
+    // Save description
+    if (isset($_POST['linen_description'])) {
+        update_post_meta($post_id, '_linen_description', sanitize_textarea_field($_POST['linen_description']));
+    }
+    
+    // Save colors
+    if (isset($_POST['linen_colors'])) {
+        update_post_meta($post_id, '_linen_colors', sanitize_text_field($_POST['linen_colors']));
+    }
+    
+    // Save sizes
+    if (isset($_POST['linen_sizes'])) {
+        update_post_meta($post_id, '_linen_sizes', sanitize_text_field($_POST['linen_sizes']));
     }
 }
-add_action('acf/init', 'linen_register_acf_fields');
+add_action('save_post', 'linen_save_meta');
 
 // Admin notice if ACF is not active
 function linen_check_acf_dependency() {
     if (!class_exists('ACF') && current_user_can('activate_plugins')) {
         ?>
-        <div class="notice notice-error">
-            <p>Linen Catalog plugin requires <a href="https://wordpress.org/plugins/advanced-custom-fields/">Advanced Custom Fields</a> to be installed and activated.</p>
+        <div class="notice notice-warning">
+            <p>Advanced Custom Fields is not activated. Linen Catalog is using a simplified field system instead.</p>
         </div>
         <?php
     }
