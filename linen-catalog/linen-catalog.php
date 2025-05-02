@@ -43,7 +43,7 @@ function linen_shortcode_output($atts) {
             $output .= '</div>';
         }
         $output .= '<h3 class="linen-item-title">' . esc_html(get_the_title()) . '</h3>';
-        $output .= '<a class="button" href="' . esc_url($permalink) . '">More details</a>';
+        $output .= '<a href="' . esc_url($permalink) . '">More details</a>';
         $output .= '</div>';
     }
     wp_reset_postdata();
