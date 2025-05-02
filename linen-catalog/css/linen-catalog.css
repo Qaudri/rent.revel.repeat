@@ -51,27 +51,6 @@
   text-transform: uppercase;
 }
 
-.linen-item .button {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 8px 14px;
-  border-radius: 4px;
-  font-size: 14px;
-  text-decoration: none;
-  transition: background-color 0.2s ease;
-  background-color: #0073aa;
-  color: white;
-}
-
-.linen-item .button:hover {
-  background-color: #005177;
-}
-
-.linen-item p {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
 /* Single Linen Page Styles */
 .single-linen-container {
     display: table;
@@ -139,21 +118,4 @@
 
 .single-linen-form {
     margin-top: 30px;
-}
-
-.single-linen-form .button {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #0073aa;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.single-linen-form .button:hover {
-    background-color: #005177;
 }
