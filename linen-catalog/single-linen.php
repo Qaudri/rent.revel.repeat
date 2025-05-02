@@ -3,6 +3,8 @@
 <div class="single-linen-container">
     <?php
     if (have_posts()) : while (have_posts()) : the_post();
+        $post_id = get_the_ID();
+        
         // Left side - Image
         echo '<div class="single-linen-image">';
         if (has_post_thumbnail()) {
@@ -16,42 +18,43 @@
         echo '<div class="single-linen-details">';
         echo '<h1 class="single-linen-title">' . get_the_title() . '</h1>';
         
-        // Description from ACF field instead of content
-        $description = get_field('description');
-        if ($description) {
+        // Description (from custom meta)
+        $description = get_post_meta($post_id, '_linen_description', true);
+        if (!empty($description)) {
             echo '<div class="single-linen-description">' . wpautop($description) . '</div>';
         }
-
-        // ACF Fields
-        $colors = get_field('color');
-        $sizes = get_field('size');
-
+        
+        // Get colors and sizes (from custom meta)
+        $colors_raw = get_post_meta($post_id, '_linen_colors', true);
+        $sizes_raw = get_post_meta($post_id, '_linen_sizes', true);
+        
+        $colors = !empty($colors_raw) ? array_map('trim', explode(',', $colors_raw)) : array();
+        $sizes = !empty($sizes_raw) ? array_map('trim', explode(',', $sizes_raw)) : array();
+        
         echo '<div class="single-linen-fields">';
         
         // Colors Field
-        if ($colors && is_array($colors) && count($colors) > 0) {
+        if (!empty($colors)) {
             echo '<div class="field-group">';
             echo '<label for="linen-color">Color:</label>';
             echo '<select name="linen-color" id="linen-color" class="linen-select">';
-            foreach ($colors as $color_option) {
-                $color_value = isset($color_option['color_value']) ? $color_option['color_value'] : '';
-                if (!empty($color_value)) {
-                    echo '<option value="' . esc_attr($color_value) . '">' . esc_html($color_value) . '</option>';
+            foreach ($colors as $color) {
+                if (!empty($color)) {
+                    echo '<option value="' . esc_attr($color) . '">' . esc_html($color) . '</option>';
                 }
             }
             echo '</select>';
             echo '</div>';
         }
-
+        
         // Sizes Field
-        if ($sizes && is_array($sizes) && count($sizes) > 0) {
+        if (!empty($sizes)) {
             echo '<div class="field-group">';
             echo '<label for="linen-size">Size:</label>';
             echo '<select name="linen-size" id="linen-size" class="linen-select">';
-            foreach ($sizes as $size_option) {
-                $size_value = isset($size_option['size_value']) ? $size_option['size_value'] : '';
-                if (!empty($size_value)) {
-                    echo '<option value="' . esc_attr($size_value) . '">' . esc_html($size_value) . '</option>';
+            foreach ($sizes as $size) {
+                if (!empty($size)) {
+                    echo '<option value="' . esc_attr($size) . '">' . esc_html($size) . '</option>';
                 }
             }
             echo '</select>';
@@ -59,7 +62,7 @@
         }
         
         echo '</div>'; // End single-linen-fields
-
+        
         // Inquiry form with JavaScript to handle selection values
         echo '<div class="linen-inquiry-section">';
         echo '<form id="linen-inquiry-form" action="' . esc_url(get_site_url() . '/inquiry/') . '" method="GET" class="single-linen-form">';
@@ -67,7 +70,7 @@
         echo '<button type="submit" class="inquiry-button">Make Inquiry</button>';
         echo '</form>';
         echo '</div>';
-
+        
         // JavaScript to handle form submission with selected values
         ?>
         <script type="text/javascript">
@@ -101,7 +104,7 @@
         });
         </script>
         <?php
-
+        
         echo '</div>'; // End single-linen-details
     endwhile; endif;
     ?>
