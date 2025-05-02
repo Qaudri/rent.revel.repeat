@@ -27,7 +27,7 @@
   margin-bottom: 12px;
   overflow: hidden;
   border-radius: 6px;
-  aspect-ratio: 1;
+  aspect-ratio: 4/3;
 }
 
 .linen-item-image img {
@@ -43,7 +43,6 @@
 }
 
 .linen-item-title {
-  margin: 10px 0;
   font-size: 18px;
   font-weight: 500;
   text-align: center;
@@ -53,16 +52,13 @@
 
 /* Single Linen Page Styles */
 .single-linen-container {
-    display: table;
-    width: 100%;
+    display: flex;
+    gap: 40px;
     margin: 40px 0;
 }
 
 .single-linen-image {
-    display: table-cell;
-    width: 50%;
-    vertical-align: top;
-    padding-right: 30px;
+    flex: 1;
 }
 
 .single-linen-image img {
@@ -73,10 +69,7 @@
 }
 
 .single-linen-details {
-    display: table-cell;
-    width: 50%;
-    vertical-align: top;
-    padding-left: 30px;
+    flex: 1;
 }
 
 .single-linen-title {
