@@ -50,7 +50,7 @@
         // Inquiry form
         echo '<form action="' . esc_url(get_site_url() . '/inquiry/') . '" method="GET" class="single-linen-form">';
         echo '<input type="hidden" name="linen_id" value="' . get_the_ID() . '">';
-        echo '<button type="submit" class="button">Make Inquiry</button>';
+        echo '<button type="submit">Make Inquiry</button>';
         echo '</form>';
 
         echo '</div>'; // End single-linen-details
