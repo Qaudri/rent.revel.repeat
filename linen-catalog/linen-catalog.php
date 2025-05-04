@@ -57,48 +57,42 @@ add_shortcode('linens', 'linen_shortcode_output');
 function linen_inquiry_page() {
     $output = '';
     
-    if (isset($_GET['linen_id'])) {
-        $linen_id = intval($_GET['linen_id']);
-        $linen = get_post($linen_id);
+    if (isset($_GET['linen_name'])) {
+        $linen_name = sanitize_text_field($_GET['linen_name']);
+        $color = isset($_GET['linen_color']) ? sanitize_text_field($_GET['linen_color']) : '';
+        $size = isset($_GET['linen_size']) ? sanitize_text_field($_GET['linen_size']) : '';
         
-        if ($linen) {
-            $color = isset($_GET['color']) ? sanitize_text_field($_GET['color']) : '';
-            $size = isset($_GET['size']) ? sanitize_text_field($_GET['size']) : '';
-            
-            $output .= '<div class="linen-inquiry-container">';
-            $output .= '<h1>Inquiry for ' . esc_html($linen->post_title) . '</h1>';
-            
-            if (!empty($color)) {
-                $output .= '<p><strong>Color:</strong> ' . esc_html($color) . '</p>';
-            }
-            
-            if (!empty($size)) {
-                $output .= '<p><strong>Size:</strong> ' . esc_html($size) . '</p>';
-            }
-            
-            // Add a form to submit the inquiry
-            $output .= '<form class="linen-inquiry-form" method="post">';
-            $output .= '<div class="form-group">';
-            $output .= '<label for="name">Your Name</label>';
-            $output .= '<input type="text" name="name" id="name" required>';
-            $output .= '</div>';
-            
-            $output .= '<div class="form-group">';
-            $output .= '<label for="email">Your Email</label>';
-            $output .= '<input type="email" name="email" id="email" required>';
-            $output .= '</div>';
-            
-            $output .= '<div class="form-group">';
-            $output .= '<label for="message">Message</label>';
-            $output .= '<textarea name="message" id="message" rows="4"></textarea>';
-            $output .= '</div>';
-            
-            $output .= '<button type="submit" class="submit-inquiry">Submit Inquiry</button>';
-            $output .= '</form>';
-            $output .= '</div>';
-        } else {
-            $output .= '<p>Linen not found.</p>';
+        $output .= '<div class="linen-inquiry-container">';
+        $output .= '<h1>Inquiry for ' . esc_html($linen_name) . '</h1>';
+        
+        if (!empty($color)) {
+            $output .= '<p><strong>Color:</strong> ' . esc_html($color) . '</p>';
         }
+        
+        if (!empty($size)) {
+            $output .= '<p><strong>Size:</strong> ' . esc_html($size) . '</p>';
+        }
+        
+        // Add a form to submit the inquiry
+        $output .= '<form class="linen-inquiry-form" method="post">';
+        $output .= '<div class="form-group">';
+        $output .= '<label for="name">Your Name</label>';
+        $output .= '<input type="text" name="name" id="name" required>';
+        $output .= '</div>';
+        
+        $output .= '<div class="form-group">';
+        $output .= '<label for="email">Your Email</label>';
+        $output .= '<input type="email" name="email" id="email" required>';
+        $output .= '</div>';
+        
+        $output .= '<div class="form-group">';
+        $output .= '<label for="message">Message</label>';
+        $output .= '<textarea name="message" id="message" rows="4"></textarea>';
+        $output .= '</div>';
+        
+        $output .= '<button type="submit" class="submit-inquiry">Submit Inquiry</button>';
+        $output .= '</form>';
+        $output .= '</div>';
     } else {
         $output .= '<p>No linen selected for inquiry.</p>';
     }
@@ -280,8 +274,7 @@ get_header(); ?>
         
         // Inquiry form with JavaScript to handle selection values
         echo \'<div class="linen-inquiry-section">\';
-        echo \'<form id="linen-inquiry-form" action="\' . esc_url(get_site_url() . \'/inquiry/\') . \'" method="GET" class="single-linen-form">\';
-        echo \'<input type="hidden" name="linen_id" value="\' . get_the_ID() . \'">\';
+        echo \'<form id="linen-inquiry-form" action="\' . esc_url(get_site_url() . \'/request-a-quote/\') . \'" method="GET" class="single-linen-form">\';
         echo \'<button type="submit" class="inquiry-button">Make Inquiry</button>\';
         echo \'</form>\';
         echo \'</div>\';
@@ -296,12 +289,20 @@ get_header(); ?>
                     // Get selected color and size
                     var colorSelect = document.getElementById(\'linen-color\');
                     var sizeSelect = document.getElementById(\'linen-size\');
+                    var linenName = document.querySelector(\'.single-linen-title\').textContent.trim();
+                    
+                    // Add linen name to form
+                    var nameInput = document.createElement(\'input\');
+                    nameInput.type = \'hidden\';
+                    nameInput.name = \'linen_name\';
+                    nameInput.value = linenName;
+                    form.appendChild(nameInput);
                     
                     // Add color to form if exists
                     if (colorSelect && colorSelect.value) {
                         var colorInput = document.createElement(\'input\');
                         colorInput.type = \'hidden\';
-                        colorInput.name = \'color\';
+                        colorInput.name = \'linen_color\';
                         colorInput.value = colorSelect.value;
                         form.appendChild(colorInput);
                     }
@@ -310,7 +311,7 @@ get_header(); ?>
                     if (sizeSelect && sizeSelect.value) {
                         var sizeInput = document.createElement(\'input\');
                         sizeInput.type = \'hidden\';
-                        sizeInput.name = \'size\';
+                        sizeInput.name = \'linen_size\';
                         sizeInput.value = sizeSelect.value;
                         form.appendChild(sizeInput);
                     }
