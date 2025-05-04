@@ -82,8 +82,7 @@
         
         // Inquiry form with JavaScript to handle selection values
         echo '<div class="linen-inquiry-section">';
-        echo '<form id="linen-inquiry-form" action="' . esc_url(get_site_url() . '/inquiry/') . '" method="GET" class="single-linen-form">';
-        echo '<input type="hidden" name="linen_id" value="' . esc_attr(get_the_ID()) . '">';
+        echo '<form id="linen-inquiry-form" action="' . esc_url(get_site_url() . '/request-a-quote/') . '" method="GET" class="single-linen-form">';
         echo '<button type="submit" class="inquiry-button">Make Inquiry</button>';
         echo '</form>';
         echo '</div>';
@@ -98,12 +97,20 @@
                     // Get selected color and size
                     var colorSelect = document.getElementById('linen-color');
                     var sizeSelect = document.getElementById('linen-size');
+                    var linenName = document.querySelector('.single-linen-title').textContent.trim();
+                    
+                    // Add linen name to form
+                    var nameInput = document.createElement('input');
+                    nameInput.type = 'hidden';
+                    nameInput.name = 'linen_name';
+                    nameInput.value = linenName;
+                    form.appendChild(nameInput);
                     
                     // Add color to form if exists
                     if (colorSelect && colorSelect.value) {
                         var colorInput = document.createElement('input');
                         colorInput.type = 'hidden';
-                        colorInput.name = 'color';
+                        colorInput.name = 'linen_color';
                         colorInput.value = colorSelect.value;
                         form.appendChild(colorInput);
                     }
@@ -112,7 +119,7 @@
                     if (sizeSelect && sizeSelect.value) {
                         var sizeInput = document.createElement('input');
                         sizeInput.type = 'hidden';
-                        sizeInput.name = 'size';
+                        sizeInput.name = 'linen_size';
                         sizeInput.value = sizeSelect.value;
                         form.appendChild(sizeInput);
                     }
