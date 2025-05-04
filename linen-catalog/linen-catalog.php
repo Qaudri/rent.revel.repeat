@@ -351,12 +351,8 @@ add_action('wp_footer', 'linen_debug_template');
 // Make sure the template file is actually used
 function linen_use_custom_template($template) {
     if (is_singular('linen')) {
-        $theme_template = get_stylesheet_directory() . '/single-linen.php';
         $plugin_template = plugin_dir_path(__FILE__) . 'single-linen.php';
-        
-        if (file_exists($theme_template)) {
-            return $theme_template;
-        } elseif (file_exists($plugin_template)) {
+        if (file_exists($plugin_template)) {
             return $plugin_template;
         }
     }
