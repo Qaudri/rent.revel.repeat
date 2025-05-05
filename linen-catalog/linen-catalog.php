@@ -107,6 +107,12 @@ function linen_inquiry_page() {
         $output .= '<p>No linen selected for inquiry. Please go back to the <a href="' . esc_url(get_post_type_archive_link('linen')) . '">linens catalog</a>.</p>';
     }
     
+    // For debugging purposes, uncomment to see all GET parameters
+    // $output .= '<div style="margin-top: 20px; padding: 10px; background: #f5f5f5; border: 1px solid #ddd;">';
+    // $output .= '<h3>Debug Information</h3>';
+    // $output .= '<pre>' . print_r($_GET, true) . '</pre>';
+    // $output .= '</div>';
+    
     return $output;
 }
 add_shortcode('linen_inquiry', 'linen_inquiry_page');
@@ -282,9 +288,9 @@ get_header(); ?>
         
         echo \'</div>\'; // End single-linen-fields
         
-        // Inquiry form with GET method to redirect to request-a-quote page
+        // Inquiry form with GET method to redirect to inquiry page
         echo \'<div class="linen-inquiry-section">\';
-        echo \'<form id="linen-inquiry-form" action="\' . esc_url(get_site_url() . \'/request-a-quote/\') . \'" method="GET" class="single-linen-form">\';
+        echo \'<form id="linen-inquiry-form" action="\' . esc_url(get_site_url() . \'/inquiry/\') . \'" method="GET" class="single-linen-form">\';
         echo \'<input type="hidden" name="linen_name" value="\' . esc_attr(get_the_title()) . \'">\';
         echo \'<button type="submit" class="inquiry-button">Make Inquiry</button>\';
         echo \'</form>\';
