@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Linen Catalog
-Description: Custom post type and shortcode to display linens with ACF integration and inquiry page.
-Version: 1.6
+Description: Custom post type and shortcode to display linens with integrated metadata fields and inquiry page.
+Version: 1.7
 Author: Muhammad AbdulQuadir Akanfe
 */
 
@@ -196,18 +196,6 @@ function linen_save_meta($post_id) {
 }
 add_action('save_post', 'linen_save_meta');
 
-// Admin notice if ACF is not active
-function linen_check_acf_dependency() {
-    if (!class_exists('ACF') && current_user_can('activate_plugins')) {
-        ?>
-        <div class="notice notice-warning">
-            <p>Advanced Custom Fields is not activated. Linen Catalog is using a simplified field system instead.</p>
-        </div>
-        <?php
-    }
-}
-add_action('admin_notices', 'linen_check_acf_dependency');
-
 // Create a template file for single-linen.php if it doesn't exist
 function linen_setup_template() {
     $theme_dir = get_stylesheet_directory();
@@ -346,7 +334,7 @@ get_header(); ?>
 }
 add_action('after_setup_theme', 'linen_setup_template');
 
-// Add template debugging function
+// Add template debugging function (only visible to administrators)
 function linen_debug_template() {
     global $template;
     if (is_singular('linen') && current_user_can('administrator')) {
@@ -371,7 +359,7 @@ add_filter('template_include', 'linen_use_custom_template');
 
 // Enqueue necessary styles
 function linen_enqueue_styles() {
-    wp_enqueue_style('linen-catalog-styles', plugin_dir_url(__FILE__) . 'css/linen-catalog.css', array(), '1.5');
+    wp_enqueue_style('linen-catalog-styles', plugin_dir_url(__FILE__) . 'css/linen-catalog.css', array(), '1.6');
 }
 add_action('wp_enqueue_scripts', 'linen_enqueue_styles');
 
