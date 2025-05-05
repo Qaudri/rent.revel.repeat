@@ -2,7 +2,7 @@
 /*
 Plugin Name: Linen Catalog
 Description: Custom post type and shortcode to display linens with ACF integration and inquiry page.
-Version: 1.5
+Version: 1.6
 Author: Muhammad AbdulQuadir Akanfe
 */
 
@@ -57,6 +57,7 @@ add_shortcode('linens', 'linen_shortcode_output');
 function linen_inquiry_page() {
     $output = '';
     
+    // Check for linen_name parameter (the key parameter we need)
     if (isset($_GET['linen_name'])) {
         $linen_name = sanitize_text_field($_GET['linen_name']);
         $color = isset($_GET['linen_color']) ? sanitize_text_field($_GET['linen_color']) : '';
@@ -90,11 +91,20 @@ function linen_inquiry_page() {
         $output .= '<textarea name="message" id="message" rows="4"></textarea>';
         $output .= '</div>';
         
+        // Add hidden fields to keep track of the linen details
+        $output .= '<input type="hidden" name="linen_name" value="' . esc_attr($linen_name) . '">';
+        if (!empty($color)) {
+            $output .= '<input type="hidden" name="linen_color" value="' . esc_attr($color) . '">';
+        }
+        if (!empty($size)) {
+            $output .= '<input type="hidden" name="linen_size" value="' . esc_attr($size) . '">';
+        }
+        
         $output .= '<button type="submit" class="submit-inquiry">Submit Inquiry</button>';
         $output .= '</form>';
         $output .= '</div>';
     } else {
-        $output .= '<p>No linen selected for inquiry.</p>';
+        $output .= '<p>No linen selected for inquiry. Please go back to the <a href="' . esc_url(get_post_type_archive_link('linen')) . '">linens catalog</a>.</p>';
     }
     
     return $output;
@@ -272,9 +282,10 @@ get_header(); ?>
         
         echo \'</div>\'; // End single-linen-fields
         
-        // Inquiry form with JavaScript to handle selection values
+        // Inquiry form with GET method to redirect to request-a-quote page
         echo \'<div class="linen-inquiry-section">\';
         echo \'<form id="linen-inquiry-form" action="\' . esc_url(get_site_url() . \'/request-a-quote/\') . \'" method="GET" class="single-linen-form">\';
+        echo \'<input type="hidden" name="linen_name" value="\' . esc_attr(get_the_title()) . \'">\';
         echo \'<button type="submit" class="inquiry-button">Make Inquiry</button>\';
         echo \'</form>\';
         echo \'</div>\';
@@ -289,14 +300,6 @@ get_header(); ?>
                     // Get selected color and size
                     var colorSelect = document.getElementById(\'linen-color\');
                     var sizeSelect = document.getElementById(\'linen-size\');
-                    var linenName = document.querySelector(\'.single-linen-title\').textContent.trim();
-                    
-                    // Add linen name to form
-                    var nameInput = document.createElement(\'input\');
-                    nameInput.type = \'hidden\';
-                    nameInput.name = \'linen_name\';
-                    nameInput.value = linenName;
-                    form.appendChild(nameInput);
                     
                     // Add color to form if exists
                     if (colorSelect && colorSelect.value) {
