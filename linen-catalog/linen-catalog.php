@@ -53,11 +53,11 @@ function linen_shortcode_output($atts) {
 }
 add_shortcode('linens', 'linen_shortcode_output');
 
-// Handle inquiry page
+// Replace the current inquiry page function with this Forminator integration
 function linen_inquiry_page() {
     $output = '';
     
-    // Check for linen_name parameter (the key parameter we need)
+    // Check for linen_name parameter
     if (isset($_GET['linen_name'])) {
         $linen_name = sanitize_text_field($_GET['linen_name']);
         $color = isset($_GET['linen_color']) ? sanitize_text_field($_GET['linen_color']) : '';
@@ -74,44 +74,32 @@ function linen_inquiry_page() {
             $output .= '<p><strong>Size:</strong> ' . esc_html($size) . '</p>';
         }
         
-        // Add a form to submit the inquiry
-        $output .= '<form class="linen-inquiry-form" method="post">';
-        $output .= '<div class="form-group">';
-        $output .= '<label for="name">Your Name</label>';
-        $output .= '<input type="text" name="name" id="name" required>';
-        $output .= '</div>';
+        // Add the Forminator form shortcode with prefilled hidden fields
+        $form_id = 1084; // Replace with your actual Forminator form ID
         
-        $output .= '<div class="form-group">';
-        $output .= '<label for="email">Your Email</label>';
-        $output .= '<input type="email" name="email" id="email" required>';
-        $output .= '</div>';
+        // Build query string with all linen details for the hidden fields
+        $prefill_data = array(
+            'linen_name' => $linen_name,
+        );
         
-        $output .= '<div class="form-group">';
-        $output .= '<label for="message">Message</label>';
-        $output .= '<textarea name="message" id="message" rows="4"></textarea>';
-        $output .= '</div>';
-        
-        // Add hidden fields to keep track of the linen details
-        $output .= '<input type="hidden" name="linen_name" value="' . esc_attr($linen_name) . '">';
         if (!empty($color)) {
-            $output .= '<input type="hidden" name="linen_color" value="' . esc_attr($color) . '">';
-        }
-        if (!empty($size)) {
-            $output .= '<input type="hidden" name="linen_size" value="' . esc_attr($size) . '">';
+            $prefill_data['linen_color'] = $color;
         }
         
-        $output .= '<button type="submit" class="submit-inquiry">Submit Inquiry</button>';
-        $output .= '</form>';
+        if (!empty($size)) {
+            $prefill_data['linen_size'] = $size;
+        }
+        
+        // Encode the data for the prefill parameter
+        $prefill_param = base64_encode(json_encode($prefill_data));
+        
+        // Display the Forminator form with prefilled data
+        $output .= do_shortcode('[forminator_form id="' . $form_id . '" data-prefill="' . $prefill_param . '"]');
+        
         $output .= '</div>';
     } else {
         $output .= '<p>No linen selected for inquiry. Please go back to the <a href="' . esc_url(get_post_type_archive_link('linen')) . '">linens catalog</a>.</p>';
     }
-    
-    // For debugging purposes, uncomment to see all GET parameters
-    // $output .= '<div style="margin-top: 20px; padding: 10px; background: #f5f5f5; border: 1px solid #ddd;">';
-    // $output .= '<h3>Debug Information</h3>';
-    // $output .= '<pre>' . print_r($_GET, true) . '</pre>';
-    // $output .= '</div>';
     
     return $output;
 }
